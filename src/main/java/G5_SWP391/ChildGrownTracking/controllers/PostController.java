@@ -12,7 +12,7 @@ import java.util.List;
 
 @RequestMapping(path = "/api/v1/post")
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class PostController {
 
     @Autowired
