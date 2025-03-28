@@ -29,7 +29,7 @@ public class MetricController {
 
     // http://localhost:8080/api/v1/metric/findByChildId
     @GetMapping("/findByChildId/{id}")
-    public ResponseEntity<ResponseObject> getMetricsByChildId(@PathVariable(required = false) Long id ) {
+    public ResponseEntity<ResponseObject> getMetricsByChildId(@PathVariable("id") Long id ) {
         return service.getAllMetricByChildId(id);
     }
 

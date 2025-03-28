@@ -50,7 +50,7 @@ public class ChildController {
     // http://localhost:8080/api/v1/child/findById
     @GetMapping("/findById/{id}")
     public ResponseEntity<ResponseObject> getChildById(
-            @PathVariable(required = false) Long id) {
+            @PathVariable("id") Long id) {
         return service.getChildById(id);
     }
 
@@ -58,7 +58,7 @@ public class ChildController {
     // http://localhost:8080/api/v1/child/findByParentId
     @GetMapping("/findByParentId/{id}")
     public ResponseEntity<ResponseObject> findChildrenByParentId(
-            @PathVariable(required = false) Long id ) {
+            @PathVariable("id") Long id ) {
         return service.findChildrenByParentId(id);
     }
 
@@ -83,7 +83,7 @@ public class ChildController {
     // Delete child by ID
     // http://localhost:8080/api/v1/child/delete/{id}
     @PutMapping("/delete/{id}")
-    public ResponseEntity<ResponseObject> deleteChild(@PathVariable(required = false) Long id) {
+    public ResponseEntity<ResponseObject> deleteChild(@PathVariable("id") Long id) {
         return service.deleteChild(id);
     }
 
@@ -91,8 +91,8 @@ public class ChildController {
     // http://localhost:8080/api/v1/child/setDoctor/
     @PutMapping("/setDoctor/{id}")
     public ResponseEntity<ResponseObject> setDoctorForChild(
-            @PathVariable(required = false) Long id,
-            @RequestParam(required = false) Long doctorId) {
+            @PathVariable("id") Long id,
+            @RequestParam("doctorId") Long doctorId) {
         return service.setDoctorForChild(id, doctorId);
     }
 
@@ -100,7 +100,7 @@ public class ChildController {
     // http://localhost:8080/api/v1/child/getChildByDoctorId
     @GetMapping("/getChildByDoctorId/{id}")
     public ResponseEntity<ResponseObject> getChildByDoctorId(
-            @PathVariable(required = false) Long id) {
+            @PathVariable("id") Long id) {
         return service.getChildByDoctorId(id);
     }
 
