@@ -43,7 +43,7 @@ public class MetricController {
 
     // http://localhost:8080/api/v1/metric/delete
     @PutMapping("/delete/{id}")
-    public ResponseEntity<ResponseObject> deleteMetric(@PathVariable(required = false) Long id ) {
+    public ResponseEntity<ResponseObject> deleteMetric(@PathVariable("id") Long id ) {
         return service.deleteMetric(id);
     }
 
