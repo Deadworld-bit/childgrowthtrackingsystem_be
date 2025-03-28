@@ -75,7 +75,7 @@ public class ChildController {
     // http://localhost:8080/api/v1/child/update/{id}
     @PutMapping("/update/{id}")
     public ResponseEntity<ResponseObject> updateChild(
-            @PathVariable(required = false) Long id,
+            @PathVariable("id") Long id,
             @RequestBody(required = false) UpdateChildRequestDTO updatedChild) {
         return service.updateChild(id, updatedChild);
     }
