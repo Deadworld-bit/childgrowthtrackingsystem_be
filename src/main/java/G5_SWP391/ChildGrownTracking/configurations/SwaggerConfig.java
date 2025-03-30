@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.servers.Server;
                           .version("1.0")
                           .description("API documentation for the project"))
                   .servers(List.of(
-                          new Server().url("https://childgrowthtrackingsystembe-production.up.railway.app")
+                          new Server().url("https://childgrowthtrackingsystembe-production.up.railway.app/")
                   ));
       }
   }
