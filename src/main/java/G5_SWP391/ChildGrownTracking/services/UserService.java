@@ -64,8 +64,6 @@ public class UserService {
         return userResponses;
     }
 
-
-
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElse(null);
         assert user != null;
