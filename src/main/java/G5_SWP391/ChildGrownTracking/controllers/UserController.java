@@ -24,6 +24,7 @@ import G5_SWP391.ChildGrownTracking.repositories.UserRepository;
 import G5_SWP391.ChildGrownTracking.responses.DoctorResponse;
 import G5_SWP391.ChildGrownTracking.responses.DoctorResponse2;
 import G5_SWP391.ChildGrownTracking.responses.ResponseObject;
+import G5_SWP391.ChildGrownTracking.responses.SpecResponse;
 import G5_SWP391.ChildGrownTracking.responses.UserResponse;
 import G5_SWP391.ChildGrownTracking.services.DoctorService;
 import G5_SWP391.ChildGrownTracking.services.UserService;
@@ -64,8 +65,8 @@ public class UserController {
     }
 
     @GetMapping("/doctor/{id}")
-    ResponseEntity<ResponseObject> getDoctorSpec(@PathVariable Long id){
-        DoctorResponse doctorResponse = doctorSevice.getDoctor(id);
+    ResponseEntity<ResponseObject> getDoctorSpec(@PathVariable("id") Long id){
+        SpecResponse doctorResponse = doctorSevice.getDoctor(id);
         if (doctorResponse != null) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("ok", "Found Doctor", doctorResponse));
         }else
