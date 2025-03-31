@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userSevice;

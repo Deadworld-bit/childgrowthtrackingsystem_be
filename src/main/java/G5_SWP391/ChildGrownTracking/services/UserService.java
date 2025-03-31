@@ -1,5 +1,11 @@
 package G5_SWP391.ChildGrownTracking.services;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Service;
+
 import G5_SWP391.ChildGrownTracking.dtos.UpdateUserDTO;
 import G5_SWP391.ChildGrownTracking.dtos.UserDTO;
 import G5_SWP391.ChildGrownTracking.models.Doctor;
@@ -8,14 +14,8 @@ import G5_SWP391.ChildGrownTracking.models.membership;
 import G5_SWP391.ChildGrownTracking.models.role;
 import G5_SWP391.ChildGrownTracking.repositories.DoctorRepository;
 import G5_SWP391.ChildGrownTracking.repositories.UserRepository;
-import G5_SWP391.ChildGrownTracking.responses.DoctorResponse;
 import G5_SWP391.ChildGrownTracking.responses.UserResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -113,6 +113,8 @@ public class UserService {
     public UserResponse updateUser(User user, UpdateUserDTO userDto) {
         if (!isEmailValid(userDto.getEmail()))
             return null;
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent())
+            return null;
 
         user.setUserName(userDto.getUserName());
         user.setEmail(userDto.getEmail());
@@ -121,7 +123,7 @@ public class UserService {
         user.setUpdateDate(java.time.LocalDateTime.now());
         user = userRepository.save(user);
 
-        if (user.getRole() == role.DOCTOR){
+        if (user.getRole() == role.DOCTOR && doctorRepository.findByUser(user) == null) {
             doctorRepository.save(new Doctor(user, "", ""));
         }
         UserResponse userResponse = new UserResponse(
