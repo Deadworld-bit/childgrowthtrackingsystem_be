@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
 import G5_SWP391.ChildGrownTracking.dtos.UpdateUserDTO;
+import G5_SWP391.ChildGrownTracking.dtos.UpdateUserProfileDTO;
 import G5_SWP391.ChildGrownTracking.dtos.UserDTO;
 import G5_SWP391.ChildGrownTracking.models.Doctor;
 import G5_SWP391.ChildGrownTracking.models.User;
@@ -36,6 +37,7 @@ public class UserService {
                     user.getId(),
                     user.getUserName(),
                     user.getEmail(),
+                    user.getPassword(),
                     user.getRole(),
                     user.getMembership(),
                     user.getCreatedDate(),
@@ -54,6 +56,7 @@ public class UserService {
             UserResponse userResponse = new UserResponse(user.getId(),
                     user.getUserName(),
                     user.getEmail(),
+                    user.getPassword(),
                     user.getRole(),
                     user.getMembership(),
                     user.getCreatedDate(),
@@ -71,6 +74,7 @@ public class UserService {
                 user.getId(),
                 user.getUserName(),
                 user.getEmail(),
+                user.getPassword(),
                 user.getRole(),
                 user.getMembership(),
                 user.getCreatedDate(),
@@ -83,7 +87,7 @@ public class UserService {
         User user = userRepository.findByUserName(userName).orElse(null);
         assert user != null;
         return new UserResponse(
-                user.getId(), user.getUserName(), user.getEmail(), user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
+                user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
         );
     }
 
@@ -105,7 +109,7 @@ public class UserService {
             user.setMembership(membership.BASIC);
             user = userRepository.save(user);
         }
-        return new UserResponse(user.getId(), user.getUserName(), user.getEmail(), user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus());
+        return new UserResponse(user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus());
     }
 
     public UserResponse updateUser(User user, UpdateUserDTO userDto) {
@@ -125,9 +129,23 @@ public class UserService {
             doctorRepository.save(new Doctor(user, "", ""));
         }
         UserResponse userResponse = new UserResponse(
-                user.getId(), user.getUserName(), user.getEmail(), user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
+                user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
         );
         return userResponse;
+    }
+
+    public UserResponse updateUserTwo(User user, UpdateUserProfileDTO updateUserProfileDTO) {
+        if (!isEmailValid(updateUserProfileDTO.getEmail()))
+            return null;
+        if (userRepository.findByEmail(updateUserProfileDTO.getEmail()).isPresent() & !user.getEmail().equals(updateUserProfileDTO.getEmail()))
+            return null;
+
+        user.setUserName(updateUserProfileDTO.getUserName());
+        user.setEmail(updateUserProfileDTO.getEmail());
+        user.setPassword(updateUserProfileDTO.getPassword());
+        user = userRepository.save(user);
+
+        return new UserResponse(user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus());
     }
 
     public UserResponse deleteUserById(Long id){
@@ -136,7 +154,7 @@ public class UserService {
             user.setStatus(false);
             userRepository.save(user);
             return new UserResponse(
-                    user.getId(), user.getUserName(), user.getEmail(), user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
+                    user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), user.isStatus()
             );
         }else {
             return null;
