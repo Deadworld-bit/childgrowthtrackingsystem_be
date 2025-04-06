@@ -1,20 +1,43 @@
 package G5_SWP391.ChildGrownTracking.models;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.persistence.*;
+import lombok.*;
 
-public enum membership {
-    BASIC("BASIC"),
-    PREMIUM("PREMIUM");
+import java.time.LocalDateTime;
 
-    private final String value;
+@Entity
+@Table(name = "memberships")
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Membership {
 
-    membership(String value) {
-        this.value = value;
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
-    @JsonValue
-    public String getValue() {
-        return value;
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private MembershipPlan plan;
+
+    private LocalDateTime startDate;
+
+    private LocalDateTime endDate;
+
+    private boolean status;
+
+    public Membership(User user, MembershipPlan plan, LocalDateTime startDate, LocalDateTime endDate, boolean status) {
+        this.user = user;
+        this.plan = plan;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status;
     }
 }
-

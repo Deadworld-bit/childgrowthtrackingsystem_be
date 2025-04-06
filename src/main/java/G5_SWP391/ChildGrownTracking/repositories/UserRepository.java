@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import G5_SWP391.ChildGrownTracking.models.Child;
 import G5_SWP391.ChildGrownTracking.models.User;
-import G5_SWP391.ChildGrownTracking.models.role;
+import G5_SWP391.ChildGrownTracking.models.Role;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserName(String userName);
@@ -25,11 +27,27 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    List<User> findAllByStatusIsTrue();
     ;
 
-    List<User> findAllByStatusIsTrueAndRole(role role);
+    List<User> findAllByStatusIsTrueAndRole(Role role);
 
     Optional<User> findByIdAndStatusIsTrue(Long doctorId);
 
     Optional<User> findByChildrenAndStatusIsTrue(Child child);
 
     Optional<User> findByEmail(String email);
+
+
+    @Query("SELECT COUNT(u) FROM User u " +
+            "WHERE u.status = :userStatus " +
+            "AND u.membership.status = :membershipStatus " +
+            "AND u.membership.plan.name = :planName")
+    Long countByMembershipPlanAndStatus(
+            @Param("planName") String planName,
+            @Param("userStatus") boolean userStatus,
+            @Param("membershipStatus") boolean membershipStatus
+    );
+
+
+
+    Long countByRoleAndStatusIsTrue(Role role);
+
 }

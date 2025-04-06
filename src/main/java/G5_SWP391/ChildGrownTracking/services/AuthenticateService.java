@@ -2,6 +2,7 @@ package G5_SWP391.ChildGrownTracking.services;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
@@ -22,7 +23,11 @@ import com.nimbusds.jwt.SignedJWT;
 
 import G5_SWP391.ChildGrownTracking.dtos.AuthenticateDTO;
 import G5_SWP391.ChildGrownTracking.dtos.IntrospcectDTO;
+import G5_SWP391.ChildGrownTracking.models.Membership;
+import G5_SWP391.ChildGrownTracking.models.MembershipPlan;
 import G5_SWP391.ChildGrownTracking.models.User;
+import G5_SWP391.ChildGrownTracking.repositories.MembershipPlanRepository;
+import G5_SWP391.ChildGrownTracking.repositories.MembershipRepository;
 import G5_SWP391.ChildGrownTracking.repositories.UserRepository;
 import G5_SWP391.ChildGrownTracking.responses.AuthenticateResponse;
 import G5_SWP391.ChildGrownTracking.responses.UserResponse;
@@ -35,7 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthenticateService {
     private final UserService userService;
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final MembershipRepository membershipRepository;
+    private final MembershipPlanRepository membershipPlanRepository;
 
     @NonFinal
     @Value("${jwt.signerkey}")
@@ -43,14 +50,47 @@ public class AuthenticateService {
 
     public AuthenticateResponse authenticate(AuthenticateDTO request) {
         User user = userService.findUserByEmailAndPassword(request.getEmail(), request.getPassword());
-        UserResponse userResponse = new UserResponse(user.getId(), user.getUserName(), user.getEmail(), user.getPassword(),user.getRole(), user.getMembership(), user.getCreatedDate(), user.getUpdateDate(), false);
         if (user == null) {
             return AuthenticateResponse.builder().authenticated(false).build();
-        }else {
-            String token = generateToken(user);
-            return AuthenticateResponse.builder().token(token).userResponse(userResponse).authenticated(true).build();
+        }
+    
+        Membership membership = membershipRepository.findByUser(user);
+    
+        String planName = null;
+    if (membership != null && membership.isStatus()) {
+        MembershipPlan plan = membership.getPlan();
+        if (plan != null) {
+            planName = plan.getName();
+            LocalDateTime now = LocalDateTime.now();
+            if (membership.getEndDate() != null && membership.getEndDate().isBefore(now)) {
+                MembershipPlan basicPlan = membershipPlanRepository.findByName("BASIC");
+                membership.setPlan(basicPlan);
+                membershipRepository.save(membership);
+                planName = basicPlan.getName();
+            }
         }
     }
+    
+        UserResponse userResponse = new UserResponse(
+            user.getId(),
+            user.getUserName(),
+            user.getEmail(),
+            null,
+            user.getRole(),
+            planName,
+            user.getCreatedDate(),
+            user.getUpdateDate(),
+            user.isStatus()
+        );
+    
+        String token = generateToken(user);
+        return AuthenticateResponse.builder()
+                                   .token(token)
+                                   .userResponse(userResponse)
+                                   .authenticated(true)
+                                   .build();
+    }
+    
 
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);

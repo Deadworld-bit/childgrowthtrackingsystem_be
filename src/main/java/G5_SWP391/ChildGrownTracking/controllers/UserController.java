@@ -2,6 +2,9 @@ package G5_SWP391.ChildGrownTracking.controllers;
 
 import java.util.List;
 
+import G5_SWP391.ChildGrownTracking.models.Membership;
+import G5_SWP391.ChildGrownTracking.repositories.MembershipPlanRepository;
+import G5_SWP391.ChildGrownTracking.repositories.MembershipRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,7 +23,6 @@ import G5_SWP391.ChildGrownTracking.dtos.UpdateUserProfileDTO;
 import G5_SWP391.ChildGrownTracking.dtos.UserDTO;
 import G5_SWP391.ChildGrownTracking.models.Doctor;
 import G5_SWP391.ChildGrownTracking.models.User;
-import G5_SWP391.ChildGrownTracking.models.membership;
 import G5_SWP391.ChildGrownTracking.repositories.DoctorRepository;
 import G5_SWP391.ChildGrownTracking.repositories.UserRepository;
 import G5_SWP391.ChildGrownTracking.responses.DoctorResponse2;
@@ -42,6 +44,8 @@ public class UserController {
     private final UserRepository userRepository;
     private final DoctorService doctorSevice;
     private final DoctorRepository doctorRepository;
+    private final MembershipRepository membershipRepository;
+    private final MembershipPlanRepository membershipPlanRepository;
 
     // http://localhost:8080/api/v1/users/member
     @GetMapping("/member")
@@ -162,20 +166,19 @@ public class UserController {
     @PutMapping("/membership/{id}")
     ResponseEntity<ResponseObject> updateUserMembership(
             @PathVariable("id") Long id,
-            @RequestParam("membership") membership membershipType) {
+            @RequestParam("membership") Long membershipPlanId) {
         User user = userRepository.findById(id).orElse(null);
 
         if (user != null) {
-            user.setMembership(membershipType);
+            Membership membership = membershipRepository.findByUser(user);
+            if (membership != null) {
+                membership.setPlan(membershipPlanRepository.findById(membershipPlanId).orElse(null));
+            }
+            user.setMembership(membership);
             User updatedUser = userRepository.save(user);
 
-            if (updatedUser != null) {
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ResponseObject("ok", "User updated successfully", null));
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new ResponseObject("fail", "Failed to update user", null));
-            }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("ok", "User updated successfully", updatedUser));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseObject("fail", "User not found", null));
@@ -217,4 +220,34 @@ public class UserController {
                     .body(new ResponseObject("false", "Cannot delete User with id: " + id, null));
         }
     }
+    // http://localhost:8080/api/v1/users/countByMembershipBasic
+    @GetMapping("/countByMembershipBasic")
+    ResponseEntity<ResponseObject> countByMembershipBasic() {
+      return userSevice.countAllByMembershipBasic();
+    }
+
+    // http://localhost:8080/api/v1/users/countByMembershipPremium
+    @GetMapping("/countByMembershipPremium")
+    ResponseEntity<ResponseObject> countByMembershipPremium() {
+      return userSevice.countAllByMembershipPremium();
+    }
+
+    // http://localhost:8080/api/v1/users/countByMembershipVIP
+    @GetMapping("/countByMembershipVIP")
+    ResponseEntity<ResponseObject> countByMembershipVIP() {
+      return userSevice.countAllByMembershipVIP();
+    }
+
+    // http://localhost:8080/api/v1/users/countAllDoctor
+    @GetMapping("/countAllDoctor")
+    ResponseEntity<ResponseObject> countAllDoctor() {
+      return userSevice.countAllDoctor();
+    }
+
+    // http://localhost:8080/api/v1/users/countAllMember
+    @GetMapping("/countAllMember")
+    ResponseEntity<ResponseObject> countAllMember() {
+      return userSevice.countAllMember();
+    }
+
 }

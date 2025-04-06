@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import G5_SWP391.ChildGrownTracking.models.membership;
-import G5_SWP391.ChildGrownTracking.models.role;
+import G5_SWP391.ChildGrownTracking.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,10 +28,10 @@ public class UserResponse {
     private String password;
 
     @JsonProperty("role")
-    private role role;
+    private Role role;
 
     @JsonProperty("membership")
-    private membership membership;
+    private String membership;
 
     @JsonProperty("createdDate")
     private LocalDateTime createdDate;
