@@ -2,17 +2,14 @@ package G5_SWP391.ChildGrownTracking.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import G5_SWP391.ChildGrownTracking.models.Membership;
+import G5_SWP391.ChildGrownTracking.repositories.MembershipRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import G5_SWP391.ChildGrownTracking.dtos.MembershipPlanDTO;
 import G5_SWP391.ChildGrownTracking.models.MembershipPlan;
@@ -30,6 +27,7 @@ public class MembershipPlanController {
 
     private final MembershipPlanRepository membershipPlanRepository;
     private final MembershipPlanService membershipPlanService;
+    private final MembershipRepository membershipRepository;
 
     @GetMapping("/getAllActive")
     public ResponseEntity<ResponseObject> getMembershipPlan() {
@@ -53,8 +51,18 @@ public class MembershipPlanController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseObject("ok", "Membership plans founded", membershipPlansResponse));
         else
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseObject("fail", "No membership plan founded", null));
+    }
+
+    @GetMapping("/count/{planId}")
+    public ResponseEntity<ResponseObject> getMembershipCount(@PathVariable Long planId,@Valid @RequestParam boolean status) {
+        Optional<MembershipPlan> membershipPlan = membershipPlanRepository.findById(planId);
+        if (membershipPlan.isPresent()) {
+            List<Membership> memberships = membershipRepository.getMembershipsByPlanAndStatusIs(membershipPlan.get(), status);
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("ok", "Membership count", memberships.size()));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("fail", "No membership founded", null));
     }
 
     @GetMapping("/getAll")
@@ -79,12 +87,16 @@ public class MembershipPlanController {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseObject("ok", "Membership plans founded", membershipPlansResponse));
         else
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseObject("fail", "No membership plan founded", null));
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseObject> createMembershipPlan(@RequestBody MembershipPlanDTO membershipPlanDTO) {
+    public ResponseEntity<ResponseObject> createMembershipPlan(@Valid @RequestBody MembershipPlanDTO membershipPlanDTO) {
+        if (membershipPlanDTO.getName().trim().isEmpty() || membershipPlanDTO.getAnnualPrice() < 0 || membershipPlanDTO.getDuration() < 0
+                || membershipPlanDTO.getMaxChildren() <= 0
+        ) return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("fail", "Name require, Price/Duration must be positive & max children must greater than 0", null));
+
         MembershipPlanResponse membershipPlan = membershipPlanService.saveMembershipPlan(membershipPlanDTO);
         if (membershipPlan != null)
             return ResponseEntity.status(HttpStatus.OK)
@@ -98,6 +110,10 @@ public class MembershipPlanController {
     public ResponseEntity<ResponseObject> updateMembershipPlan(
             @PathVariable Long id,
             @RequestBody MembershipPlanDTO membershipPlanDTO) {
+        if (membershipPlanDTO.getName().trim().isEmpty() || membershipPlanDTO.getAnnualPrice() < 0 || membershipPlanDTO.getDuration() < 0
+                || membershipPlanDTO.getMaxChildren() <= 0
+        ) return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("fail", "Name require, Price/Duration must be positive & max children must greater than 0", null));
+
         MembershipPlan membershipPlan = membershipPlanRepository.findById(id).orElse(null);
         if (membershipPlan != null) {
             MembershipPlanResponse membershipPlanResponse = membershipPlanService.updateMembershipPlan(membershipPlan,
@@ -106,7 +122,7 @@ public class MembershipPlanController {
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject("ok", "Membership plan modified successfully", membershipPlanResponse));
             else
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                return ResponseEntity.status(HttpStatus.OK)
                         .body(new ResponseObject("fail", "No membership plan modified", membershipPlanResponse));
         } else
             return ResponseEntity.status(HttpStatus.OK)
@@ -115,6 +131,7 @@ public class MembershipPlanController {
 
     @PutMapping("/disable/{id}")
     public ResponseEntity<ResponseObject> disableMembershipPlan(@PathVariable Long id) {
+        if (id == 1) return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("fail", "Cannot disable BASIC membership plan", null));
         return membershipPlanRepository.findById(id)
                 .map(mp -> {
                     mp.setStatus(false);
@@ -131,7 +148,7 @@ public class MembershipPlanController {
                             "fail",
                             "No membership plan found",
                             null);
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp);
+                    return ResponseEntity.status(HttpStatus.OK).body(resp);
                 });
     }
 
@@ -153,7 +170,7 @@ public class MembershipPlanController {
                             "fail",
                             "No membership plan found",
                             null);
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp);
+                    return ResponseEntity.status(HttpStatus.OK).body(resp);
                 });
     }
 }

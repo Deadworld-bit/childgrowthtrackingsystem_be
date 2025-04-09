@@ -5,26 +5,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class MembershipResponse {
-    private long id;
+public class MetricResponse {
+    private Long id;
 
-    private String username;
+    private BigDecimal weight;
 
-    private String planname;
+    private BigDecimal height;
 
-    private int maxChildren;
+    private BigDecimal BMI;
 
-    private int duration;
+    private LocalDateTime recoredDate;
 
-    private LocalDateTime startDate;
-
-    private LocalDateTime endDate;
+    private LocalDateTime createdDate;
 
     private boolean status;
 }
